@@ -1,0 +1,38 @@
+{
+  "name": "nla_ml",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt-ts",
+    "build": "nuxt-ts build",
+    "start": "nuxt-ts start",
+    "generate": "nuxt-ts generate",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@nuxt/content": "^1.9.0",
+    "@nuxt/typescript-runtime": "^2.0.0",
+    "@nuxtjs/axios": "^5.12.2",
+    "@nuxtjs/pwa": "^3.0.2",
+    "@nuxtjs/vuetify": "^1.11.2",
+    "@types/express": "^4.17.8",
+    "@types/mongoose": "^5.7.36",
+    "core-js": "^3.6.5",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.10",
+    "nuxt": "^2.14.6"
+  },
+  "devDependencies": {
+    "@nuxt/types": "^2.14.6",
+    "@nuxt/typescript-build": "^2.0.3",
+    "@vue/test-utils": "^1.1.0",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-jest": "^26.5.0",
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "jest": "^26.5.0",
+    "prettier": "^2.1.2",
+    "ts-jest": "^26.4.1",
+    "vue-jest": "^3.0.4"
+  }
+}
