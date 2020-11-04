@@ -47,7 +47,7 @@ export default {
     // https://go.nuxtjs.dev/content
     '@nuxt/content',
     //Custom module
-    '~/api/modules/io',
+    // '~/api/modules/io',
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
