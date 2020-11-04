@@ -318,8 +318,12 @@
           map.panTo(location)
         })
       },
-      mapContinue(){
-        //Todo process name of place and call back into geo coding
+      async mapContinue(){
+        await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${this.currentLocation.lat},${this.currentLocation.lng}&region=gh&key=AIzaSyDm15qiJQxUMuuUPmB0XTwbwfd1ELN9ml0`)
+          .then(res=>res.json())
+          .then(res=>{
+            this.places.name = res.results[0].formatted_address
+          })
       }
     }
   })
