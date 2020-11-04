@@ -1,6 +1,10 @@
 <template>
   <v-app dark>
     <v-app-bar app color="primary" clipped-right clipped-left>
+      <v-avatar left color="primary">
+        <v-img contain aspect-ratio="1" :src="require('../assets/logo.svg')"/>
+      </v-avatar>
+      <span class="ml-3 headline white--text" v-if="$vuetify.breakpoint.mdAndUp">Admin Panel</span>
       <v-spacer/>
       <v-btn dark icon>
         <v-icon>mdi-bell-outline</v-icon>
@@ -57,12 +61,16 @@
   </v-app>
 </template>
 
-<script>
-  export default {
+<script lang="ts">
+  import Vue from 'vue'
+  export default Vue.extend({
     data() {
       return {
         openNav: false
       }
+    },
+    created(): void {
+      this.$vuetify.theme.dark = !true
     }
-  }
+  })
 </script>
