@@ -120,20 +120,20 @@
           <v-menu offset-y v-model="map.places.show_suggestions">
             <template v-slot:activator="{on}">
               <v-text-field
+                :loading="map.places.loading"
                 @keypress.enter="searchPlaces"
                 dense
                 filled
                 hide-details
-                :loading="map.places.loading"
                 placeholder="Search place"
                 solo
                 v-model="map.places.search_phrase">
-                <v-icon v-show="map.places.search_phrase" @click="searchPlaces" slot="append">mdi-magnify</v-icon>
+                <v-icon @click="searchPlaces" slot="append" v-show="map.places.search_phrase">mdi-magnify</v-icon>
                 <v-icon @click="map.show = false" slot="append-outer">mdi-close</v-icon>
               </v-text-field>
             </template>
             <v-list dense>
-              <v-list-item v-for="(place, index) in map.places.results" :key="index" @click="selectPlace(place)">
+              <v-list-item :key="index" @click="selectPlace(place)" v-for="(place, index) in map.places.results">
                 <v-list-item-title>
                   {{place.formatted_address}}
                 </v-list-item-title>
@@ -143,7 +143,6 @@
         </v-card-title>
         <client-only>
           <gmap-map
-            @click="selectPoint"
             :center="map.default_location"
             :options="{
               zoomControl: true,
@@ -154,18 +153,20 @@
               fullscreenControl: false,
             }"
             :zoom="13"
+            @click="selectPoint"
             language="en"
             ref="gmap"
             style="height: 400px"
             v-if="map.show"
           >
             <gmap-marker
-              v-if="map.marker_location"
               :position="map.marker_location"
+              v-if="map.marker_location"
             ></gmap-marker>
           </gmap-map>
         </client-only>
-        <v-btn :disabled="!map.marker_location" @click="mapContinue" block color="primary"
+        <v-btn :disabled="!map.marker_location"
+               @click="mapContinue" block color="primary"
                large tile>Continue
         </v-btn>
       </v-card>
@@ -178,6 +179,7 @@
     lat: number
     lng: number
   }
+
   interface IMapOptions {
     show: boolean,
     callback: (arg?: any) => any | undefined
@@ -191,6 +193,7 @@
     default_location: ILatLng
     marker_location: ILatLng | null
   }
+
   interface ILocation {
     street?: string,
     coordinates: [number?, number?]
@@ -202,6 +205,7 @@
       location: ILatLng
     }
   }
+
   interface IRequestDetails {
     date: string,
     phoneNumber: string,
@@ -236,18 +240,19 @@
   const map: IMapOptions = {
     show: true,
     marker_location: null,
-    default_location: {lng: -0.1984131, lat: 5.6505673},
+    default_location: { lng: -0.1984131, lat: 5.6505673 },
     places: {
       loading: false,
       show_suggestions: false,
       results: [],
-      search_phrase: '',
+      search_phrase: ''
     },
     location: {
       street: '',
       coordinates: []
     },
-    callback: () => {
+    callback: (location: ILocation) => {
+      console.log({location})
     }
   }
 
@@ -255,7 +260,7 @@
   import Vue from 'vue'
 
   export default Vue.extend({
-    name: "requests",
+    name: 'requests',
     data() {
       return {
         map,
@@ -263,15 +268,15 @@
         dialogDelete: false,
         requests: [{}, {}],
         headers: [
-          {text: 'Customer', value: 'displayName', align: 'center'},
-          {text: 'Pickup Address', value: 'pickupAddress', sortable: false, align: 'center'},
-          {text: 'Drop Off Address', value: 'dropOffAddress', sortable: false, align: 'center'},
+          { text: 'Customer', value: 'displayName', align: 'center' },
+          { text: 'Pickup Address', value: 'pickupAddress', sortable: false, align: 'center' },
+          { text: 'Drop Off Address', value: 'dropOffAddress', sortable: false, align: 'center' },
           // {text: 'Item', value: 'item', sortable: false},
-          {text: 'Status', value: 'status', align: 'center'},
-          {text: 'Pick Up Date ', value: 'pickUpDate', align: 'center'},
-          {text: 'Drop Off Date ', value: 'dropOffDate', align: 'center'},
-          {text: 'Date Created', value: 'createdAt', align: 'center'},
-          {text: 'Assign', value: 'assign', align: 'center'},
+          { text: 'Status', value: 'status', align: 'center' },
+          { text: 'Pick Up Date ', value: 'pickUpDate', align: 'center' },
+          { text: 'Drop Off Date ', value: 'dropOffDate', align: 'center' },
+          { text: 'Date Created', value: 'createdAt', align: 'center' },
+          { text: 'Assign', value: 'assign', align: 'center' }
         ],
         dateAndPhoneAreSame: true,
         newRequestForm
@@ -283,30 +288,32 @@
         this.map.show = true
       },
       setPickUplocation(location: ILocation): void {
+        console.log('in callback')
         this.newRequestForm.pickup.location = location
+        this.map.show = false
       },
       async searchPlaces() {
         this.map.places.loading = true
         await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${this.map.places.search_phrase}&region=gh&key=AIzaSyDm15qiJQxUMuuUPmB0XTwbwfd1ELN9ml0`)
-          .then(res=>res.json())
-          .then(({results}: {results: IPlacesResult[]})=>{
-            if (results.length > 0){
+          .then(res => res.json())
+          .then(({ results }: { results: IPlacesResult[] }) => {
+            if (results.length > 0) {
               this.map.places.results = results
               this.map.places.show_suggestions = true
             }
-          }).catch(err=>{
+          }).catch(err => {
             console.error(err)
-          }).finally(()=>{
+          }).finally(() => {
             this.map.places.loading = false
           })
       },
-      selectPlace(place: IPlacesResult){
+      selectPlace(place: IPlacesResult) {
         let location = place.geometry.location
         this.map.default_location = location
         // @ts-ignore
         this.panToLocation(location)
       },
-      selectPoint(event: any){
+      selectPoint(event: any) {
         console.log()
         let location = { lng: event.latLng.lng(), lat: event.latLng.lat() }
         this.map.marker_location = location
@@ -318,12 +325,19 @@
           map.panTo(location)
         })
       },
-      async mapContinue(){
-        await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${this.currentLocation.lat},${this.currentLocation.lng}&region=gh&key=AIzaSyDm15qiJQxUMuuUPmB0XTwbwfd1ELN9ml0`)
-          .then(res=>res.json())
-          .then(res=>{
-            this.places.name = res.results[0].formatted_address
-          })
+      async mapContinue() {
+        if (this.map.marker_location) {
+          console.log('street search...')
+          const location = this.map.marker_location
+          await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&region=gh&key=AIzaSyDm15qiJQxUMuuUPmB0XTwbwfd1ELN9ml0`)
+            .then(res => res.json())
+            .then(res => {
+              this.map.location.street = res.results[0].formatted_address
+              this.map.location.coordinates = [location.lng, location.lat]
+              console.log('callback fired...')
+              this.map.callback(this.map.location)
+            })
+        }
       }
     }
   })
