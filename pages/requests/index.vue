@@ -287,6 +287,7 @@
         this.map.callback = callback
         this.map.show = true
       },
+      
       setPickUplocation(location: ILocation): void {
         console.log('in callback')
         this.newRequestForm.pickup.location = location
