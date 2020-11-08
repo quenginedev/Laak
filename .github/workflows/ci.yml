@@ -14,6 +14,9 @@ jobs:
       - name: Checkout 🛎
         uses: actions/checkout@master
 
+      - name: Intall Dependensies
+        run: npm ci
+
       - name: Deploy to Google App Engine
         uses: claudiuri/deploy-gae-action@master
         with:
