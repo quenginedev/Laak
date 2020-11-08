@@ -18,13 +18,13 @@ export default function () {
     // @ts-ignore
     this.nuxt.hook('close', () => new Promise(server.close))
 
-    let counter = 0
-    setInterval(() => {
-      pubsub.publish('topic', {
-        name: 'counter',
-        data: counter++
-      })
-    }, 3000)
+    // let counter = 0
+    // setInterval(() => {
+    //   pubsub.publish('topic', {
+    //     name: 'counter',
+    //     data: counter++
+    //   })
+    // }, 3000)
     // Add socket.io events
     io.on('connection', (socket) => {
       console.log('user connected')

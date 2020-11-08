@@ -5,42 +5,17 @@ on:
     branches:
       - main
       - master
-  pull_request:
-    branches:
-      - main
-      - master
 
 jobs:
-  ci:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [14]
+  deploy:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
 
-      - name: Setup node env 🏗
-        uses: actions/setup-node@v2.1.2
+      - name: Deploy to Google App Engine
+        uses: claudiuri/deploy-gae-action@master
         with:
-          node-version: ${{ matrix.node }}
-
-      - name: Cache node_modules 📦
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies 👨🏻‍💻
-        run: npm ci
-
-      - name: Run linter 👀
-        run: npm run lint
-
-      - name: Run tests 🧪
-        run: npm run test
+          service-account:  ${{ secrets.APP_ENGINE_SERVICE_ACCOUNT }}
+          project-id: ${{ secrets.PROJECT_ID }}

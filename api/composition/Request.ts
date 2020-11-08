@@ -12,7 +12,15 @@ const location: SchemaDefinition = new MSchema({
 })
 
 const Schema: SchemaDefinition = {
-  user: { type: String },
+  user: {
+    _id: { type: String, required: true },
+    displayName: String
+  },
+  package: {
+    width: Number,
+    height: Number,
+    length: Number
+  },
   status: {
     type: String, enum: [
       'pending',

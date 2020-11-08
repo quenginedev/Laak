@@ -2,6 +2,7 @@ import {model, Model, SchemaDefinition, HookNextFunction, Schema} from 'mongoose
 import {Router, Request, Response, RequestHandler} from 'express'
 import DocGen from "../api/docGen"
 import PubSub = PubSubJS.Base;
+import { doc } from 'prettier'
 
 export interface IRestComposerOpt {
   docGen?: DocGen
@@ -51,7 +52,9 @@ export default class RestComposer {
       throw {message: 'schema undefined'}
 
 
-    const schema = new Schema(schemaDefinition)
+    const schema = new Schema(schemaDefinition, {
+      timestamps: true
+    })
 
     if (options?.middleware && Array.isArray(options.middleware)) {
       options.middleware.forEach(middleware => {
@@ -64,7 +67,9 @@ export default class RestComposer {
 
     this.router = Router()
     this.model = model(name, schema)
+    this.cxt?.docGen?.addType(name, this.model)
     this.addCustomRoute('/', RequestMethod.GET, this.find, `${name} find many`)
+    this.addCustomRoute('/count', RequestMethod.GET, this.count, `${name} count`)
     this.addCustomRoute('/one', RequestMethod.GET, this.findOne, `${name} find one`)
     this.addCustomRoute('/:id', RequestMethod.GET, this.findById, `${name} find by ID`)
     this.addCustomRoute('/:ids', RequestMethod.GET, this.findByIds, `${name} find IDs`)
@@ -93,12 +98,30 @@ export default class RestComposer {
     return this.router
   }
 
+  private count = (req:Request, res:Response)=> {
+
+    let { where }: any = this.parseQuery(req.query)
+    // this.model.find().exec((error, res)=>{
+    //   console.log({ where, res, error })
+    // })
+
+    this.model.countDocuments(where, (err, number) => {
+      if (err)
+      res.status(500).json({ error: err.message })
+      else{
+        res.json(number)
+      }
+    })
+  }
+
   private find = (req: Request, res: Response) => {
-    const {where, sort, limit}: any = req.query
-    console.log(this.model)
+    let {where, sort, limit}: any = this.parseQuery(req.query)
+
     let query = this.model.find(where)
+
     if (sort)
       query.sort(sort)
+    console.log({sort})
 
     if (limit)
       query.limit(limit)
@@ -165,11 +188,11 @@ export default class RestComposer {
     })
 
   }
-  private createOne = (req: Request, res: Response) => {
+  private createOne = async (req: Request, res: Response) => {
     const {data} = req.body
-    console.log({data})
+
     let doc = new this.model(data)
-    doc.save()
+    await doc.save()
       .then((data: any) => {
         this.cxt?.pubsub?.publish(this.name, {
           type: 'CREATE',
@@ -180,9 +203,10 @@ export default class RestComposer {
       res.status(500).json(err)
     })
   }
+
   private createMany = (req: Request, res: Response) => {
     const {data} = req.body
-    this.model.create(data)
+    this.model.bulkWrite(data)
       .then(data => {
         this.cxt?.pubsub?.publish(this.name, {
           type: 'CREATE',
@@ -218,5 +242,18 @@ export default class RestComposer {
       }).catch(err => {
       res.status(500).json(err)
     })
+  }
+
+  private parseQuery(query: any): Object{
+    if (typeof query ==='string')
+     query = JSON.parse(query)
+
+    if (query.where && typeof query.where === 'string')
+      query.where = JSON.parse(query.where)
+
+    if (query.sort && typeof query.sort === 'string')
+      query.sort = JSON.parse(query.sort)
+
+    return query
   }
 }

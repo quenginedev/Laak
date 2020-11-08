@@ -47,6 +47,8 @@ export default {
     '@nuxtjs/pwa',
     // https://go.nuxtjs.dev/content
     '@nuxt/content',
+    // https://www.npmjs.com/package/@nuxtjs/dayjs
+    '@nuxtjs/dayjs',
     //Custom module
     // '~/api/modules/io',
   ],
@@ -63,10 +65,10 @@ export default {
     theme: {
       dark: false,
       themes: {
-        dark: {
+        light: {
           primary: colors.blue.darken2,
           accent: colors.grey.darken3,
-          secondary: colors.amber.darken3,
+          secondary: colors.orange.base,
           info: colors.teal.lighten1,
           warning: colors.amber.base,
           error: colors.deepOrange.accent4,
@@ -77,10 +79,15 @@ export default {
   },
 
   serverMiddleware: [
-    // { path: '/api', handler: '~/api/index.ts' },
+    { path: '/api', handler: '~/api/index.ts' },
   ],
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
+  },
+
+  dayjs: {
+    locales: ['en', 'ja'],
+    defaultLocale: 'en'
   }
 }
