@@ -55,7 +55,19 @@ export default {
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3000'
+    baseURL: 'http://localhost:3000', // Used as fallback if no runtime config is provided
+  },
+
+  publicRuntimeConfig: {
+    axios: {
+      browserBaseURL: process.env.BROWSER_BASE_URL
+    }
+  },
+
+  privateRuntimeConfig: {
+    axios: {
+      baseURL: process.env.BASE_URL
+    }
   },
 
   // Content module configuration (https://go.nuxtjs.dev/config-content)
@@ -68,6 +80,15 @@ export default {
       dark: false,
       themes: {
         light: {
+          primary: colors.blue.darken2,
+          accent: colors.grey.darken3,
+          secondary: colors.orange.base,
+          info: colors.teal.lighten1,
+          warning: colors.amber.base,
+          error: colors.deepOrange.accent4,
+          success: colors.green.accent3
+        },
+        dark: {
           primary: colors.blue.darken2,
           accent: colors.grey.darken3,
           secondary: colors.orange.base,
