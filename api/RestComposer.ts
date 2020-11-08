@@ -121,7 +121,6 @@ export default class RestComposer {
 
     if (sort)
       query.sort(sort)
-    console.log({sort})
 
     if (limit)
       query.limit(limit)

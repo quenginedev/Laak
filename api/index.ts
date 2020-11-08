@@ -57,7 +57,6 @@ api.get('/', (_, res) => {
 })
 
 api.get('/all_routes', (_, res) => {
-  console.log(docGen.getDoc())
   res.json(docGen.getDoc())
 })
 

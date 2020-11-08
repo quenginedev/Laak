@@ -16,7 +16,7 @@ jobs:
 
       - name: Intall Dependensies
         run: npm ci
-        
+
       - name: Build Project
         run: npm run build
 
