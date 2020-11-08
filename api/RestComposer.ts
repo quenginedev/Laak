@@ -1,9 +1,13 @@
-import {model , Model, SchemaDefinition, HookNextFunction, Schema} from 'mongoose'
+import {model, Model, SchemaDefinition, HookNextFunction, Schema} from 'mongoose'
 import {Router, Request, Response, RequestHandler} from 'express'
-import DocGen from "~/api/docGen";
+import DocGen from "../api/docGen"
+import PubSub = PubSubJS.Base;
+import { doc } from 'prettier'
 
-interface IRestComposerOpt {
-  middleware?: { hook: MiddlewareHook, event: MiddlewareEvent, callback: (next: HookNextFunction)=>any }[]
+export interface IRestComposerOpt {
+  docGen?: DocGen
+  pubsub?: PubSub
+  middleware?: { hook: MiddlewareHook, event: MiddlewareEvent, callback: (next: HookNextFunction) => any }[]
 }
 
 interface QueryData {
@@ -31,30 +35,41 @@ enum RequestMethod {
 }
 
 export default class RestComposer {
-
   routes: { path: string, request: RequestHandler, method: RequestMethod, description?: string }[] = []
   model: Model<any>
   name: string
+  private router: Router
+  private cxt?: {
+    pubsub?: PubSub,
+    docGen?: DocGen
+  } = {}
 
-  constructor( name: string, schemaDefinition: SchemaDefinition, options?: IRestComposerOpt ) {
-    if (!name )
-      throw { message: 'schema name undefined' }
+  constructor(name: string, schemaDefinition: SchemaDefinition, options?: IRestComposerOpt) {
+    if (!name)
+      throw {message: 'schema name undefined'}
     this.name = name
-    if ( !schemaDefinition )
-      throw { message: 'schema undefined' }
+    if (!schemaDefinition)
+      throw {message: 'schema undefined'}
 
 
-    const schema = new Schema(schemaDefinition)
+    const schema = new Schema(schemaDefinition, {
+      timestamps: true
+    })
 
-    if (options?.middleware && Array.isArray(options.middleware)){
-      options.middleware.forEach( middleware =>{
+    if (options?.middleware && Array.isArray(options.middleware)) {
+      options.middleware.forEach(middleware => {
         // @ts-ignore TODO find a way out
         schema[middleware.hook](middleware.event, middleware.callback)
       })
     }
 
+    this.cxt = options
+
+    this.router = Router()
     this.model = model(name, schema)
+    this.cxt?.docGen?.addType(name, this.model)
     this.addCustomRoute('/', RequestMethod.GET, this.find, `${name} find many`)
+    this.addCustomRoute('/count', RequestMethod.GET, this.count, `${name} count`)
     this.addCustomRoute('/one', RequestMethod.GET, this.findOne, `${name} find one`)
     this.addCustomRoute('/:id', RequestMethod.GET, this.findById, `${name} find by ID`)
     this.addCustomRoute('/:ids', RequestMethod.GET, this.findByIds, `${name} find IDs`)
@@ -68,99 +83,135 @@ export default class RestComposer {
     this.addCustomRoute('/many', RequestMethod.DELETE, this.deleteMany, `${name} delete many`)
   }
 
-  addCustomRoute(path: string, method: RequestMethod, request: RequestHandler, description?: string): void{
-    this.routes.push({ path, method, request, description})
+  addCustomRoute(path: string, method: RequestMethod, request: RequestHandler, description?: string): void {
+    this.routes.push({path, method, request, description})
   }
 
-  execute(docGen? : DocGen): Router{
-    const router = Router()
-    this.routes.forEach(({ method, request, path, description }) => {
-      if (docGen)
-        docGen.addPath(this.name, { method, path, description })
-      router[method](path, request)
+  execute(): Router {
+    this.routes.forEach(({method, request, path, description}) => {
+      if (this.cxt?.docGen){
+        this.cxt.docGen.addPath(this.name, {method, path, description})
+      }
+      this.router[method](path, request)
     })
 
-    return router
+    return this.router
   }
 
-  private find = ( req: Request, res: Response ) => {
-    const { where, sort, limit }: any = req.query
-    console.log(this.model)
+  private count = (req:Request, res:Response)=> {
+
+    let { where }: any = this.parseQuery(req.query)
+    // this.model.find().exec((error, res)=>{
+    //   console.log({ where, res, error })
+    // })
+
+    this.model.countDocuments(where, (err, number) => {
+      if (err)
+      res.status(500).json({ error: err.message })
+      else{
+        res.json(number)
+      }
+    })
+  }
+
+  private find = (req: Request, res: Response) => {
+    let {where, sort, limit}: any = this.parseQuery(req.query)
+
     let query = this.model.find(where)
+
     if (sort)
       query.sort(sort)
+    console.log({sort})
 
     if (limit)
       query.limit(limit)
 
-    query.then(data=>{
+    query.then(data => {
       res.json(data)
-    }).catch(error=>{
+    }).catch(error => {
       res.status(500).json({error: error.message})
     })
   }
   private findOne = (req: Request, res: Response) => {
-    const { where }: any = req.query
+    const {where}: any = req.query
     this.model.findOne(where)
-      .then(data=>{
+      .then(data => {
         res.json(data)
-      }).catch(error=>{
+      }).catch(error => {
       res.status(500).json({error: error.message})
     })
   }
   private findById = (req: Request, res: Response) => {
-    const { id } : any = req.params
+    const {id}: any = req.params
     this.model.findById(id)
-      .then(data=>{
+      .then(data => {
         res.json(data)
-      }).catch(error=>{
-        res.status(500).json({error: error.message})
+      }).catch(error => {
+      res.status(500).json({error: error.message})
     })
   }
   private findByIds = (req: Request, res: Response) => {
-    const { ids = [] }: any = req.query
-    this.model.find({ _id : { $in : ids } })
-      .then(data=>{
+    const {ids = []}: any = req.query
+    this.model.find({_id: {$in: ids}})
+      .then(data => {
         res.json(data)
-      }).catch(error=>{
+      }).catch(error => {
       res.status(500).json({error: error.message})
     })
   }
 
   private updateMany = (req: Request, res: Response) => {
-    const { where, data } : any = req.body
+    const {where, data}: any = req.body
     this.model.updateMany(where, data)
-      .then(data=>{
+      .then(data => {
+        this.cxt?.pubsub?.publish(this.name, {
+          type: 'UPDATE',
+          data
+        })
         res.json(data)
-      }).catch(error=>{
+      }).catch(error => {
       res.status(500).json({error: error.message})
     })
 
   }
   private updateOne = (req: Request, res: Response) => {
-    const { where, data } : any = req.body
+    const {where, data}: any = req.body
     this.model.updateOne(where, data)
-      .then(data=>{
+      .then(data => {
+        this.cxt?.pubsub?.publish(this.name, {
+          type: 'UPDATE',
+          data
+        })
         res.json(data)
-      }).catch(error=>{
+      }).catch(error => {
       res.status(500).json({error: error.message})
     })
 
   }
-  private createOne = (req: Request, res: Response) => {
-    console.log('hello', req.body)
-    const { data = {} } = req.body
-    this.model.create(data)
-      .then( data => {
+  private createOne = async (req: Request, res: Response) => {
+    const {data} = req.body
+
+    let doc = new this.model(data)
+    await doc.save()
+      .then((data: any) => {
+        this.cxt?.pubsub?.publish(this.name, {
+          type: 'CREATE',
+          data
+        })
         res.json(data)
-      }).catch(err => {
-        res.status(500).json(err)
+      }).catch((err: any) => {
+      res.status(500).json(err)
     })
   }
+
   private createMany = (req: Request, res: Response) => {
-    const { data } = req.body
-    this.model.create(data)
-      .then( data => {
+    const {data} = req.body
+    this.model.bulkWrite(data)
+      .then(data => {
+        this.cxt?.pubsub?.publish(this.name, {
+          type: 'CREATE',
+          data
+        })
         res.json(data)
       }).catch(err => {
       res.status(500).json(err)
@@ -170,18 +221,39 @@ export default class RestComposer {
     const {data} = req.body
     this.model.deleteOne(data)
       .then(data => {
+        this.cxt?.pubsub?.publish(this.name, {
+          type: 'DELETE',
+          data
+        })
         res.json(data)
       }).catch(err => {
       res.status(500).json(err)
     })
   }
   private deleteMany = (req: Request, res: Response) => {
-    const { data } = req.body
+    const {data} = req.body
     this.model.deleteMany(data)
-      .then( data => {
+      .then(data => {
+        this.cxt?.pubsub?.publish(this.name, {
+          type: 'DELETE',
+          data
+        })
         res.json(data)
       }).catch(err => {
       res.status(500).json(err)
     })
+  }
+
+  private parseQuery(query: any): Object{
+    if (typeof query ==='string')
+     query = JSON.parse(query)
+
+    if (query.where && typeof query.where === 'string')
+      query.where = JSON.parse(query.where)
+
+    if (query.sort && typeof query.sort === 'string')
+      query.sort = JSON.parse(query.sort)
+
+    return query
   }
 }

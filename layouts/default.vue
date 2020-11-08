@@ -1,11 +1,20 @@
 <template>
-  <v-app dark>
-    <v-app-bar app color="primary" clipped-right clipped-left>
+  <v-app>
+    <v-app-bar app :color="$vuetify.theme.dark ? '': 'white'" clipped-right clipped-left>
+      <v-avatar left color="primary" class="pa-1">
+        <v-img contain aspect-ratio="1" :src="require('../assets/logo.svg')"/>
+      </v-avatar>
+      <span class="ml-3 headline primary--text" v-if="$vuetify.breakpoint.mdAndUp">
+        Admin Panel
+      </span>
       <v-spacer/>
-      <v-btn dark icon>
+      <v-btn icon color="orange" @click="$vuetify.theme.dark = !$vuetify.theme.dark">
+        <v-icon>mdi-theme-light-dark</v-icon>
+      </v-btn>
+      <v-btn icon disabled>
         <v-icon>mdi-bell-outline</v-icon>
       </v-btn>
-      <v-btn @click="openNav = !openNav" dark icon>
+      <v-btn @click="openNav = !openNav" icon>
         <v-icon>mdi-menu</v-icon>
       </v-btn>
     </v-app-bar>
@@ -57,12 +66,15 @@
   </v-app>
 </template>
 
-<script>
-  export default {
+<script lang="ts">
+  import Vue from 'vue'
+  export default Vue.extend({
     data() {
       return {
         openNav: false
       }
+    },
+    created(): void {
     }
-  }
+  })
 </script>
