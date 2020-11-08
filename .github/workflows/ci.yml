@@ -16,6 +16,9 @@ jobs:
 
       - name: Intall Dependensies
         run: npm ci
+        
+      - name: Build Project
+        run: npm run build
 
       - name: Deploy to Google App Engine
         uses: claudiuri/deploy-gae-action@master
