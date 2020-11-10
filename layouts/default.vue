@@ -75,6 +75,9 @@
         </v-slide-x-transition>
       </v-container>
     </v-main>
+    <v-footer app inset>
+      Socket testing
+    </v-footer>
   </v-app>
 </template>
 

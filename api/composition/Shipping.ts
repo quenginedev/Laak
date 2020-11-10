@@ -5,7 +5,7 @@ import { Types } from 'mongoose'
 const ShippingSchema: SchemaDefinition = {
   driver_id: { type: Types.ObjectId, ref: 'driver' },
   products_ids: [{type: Types.ObjectId, ref: 'request'}],
-  last_seen_log: [{
+  last_seen_logs: [{
     time: Date,
     type: {type: String, enum: ['Point'], default: 'Point'},
     coordinates: {type: [Number]}

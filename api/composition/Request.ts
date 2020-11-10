@@ -1,5 +1,5 @@
 import RestComposer, {IRestComposerOpt} from "../../api/RestComposer"
-import {SchemaDefinition, Schema as MSchema} from "mongoose"
+import { SchemaDefinition, Schema as MSchema, Types } from 'mongoose'
 
 const location: SchemaDefinition = new MSchema({
   street: String,
@@ -37,7 +37,7 @@ const Schema: SchemaDefinition = {
     phoneNumber: {type: String, required: [true, 'origin phone number required']},
     location: {type: location, required: [true, 'origin address not provided']}
   },
-  driver_id: String,
+  shipping_id: { type: Types.ObjectId, ref: 'shipping' },
   price: Number
 }
 
