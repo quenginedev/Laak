@@ -7,6 +7,7 @@ import PubSub from 'pubsub-js'
 import RouteComposer from '../api/RouteComposer'
 import Request from '../api/composition/Request'
 import User from '../api/composition/User'
+import Shipping from './composition/Shipping'
 
 const mongo_uri = process.env.NODE_ENV == 'production' ?
   'mongodb+srv://quasar:Jimjam241@laakcluster.7ad6h.mongodb.net/delivery_service?retryWrites=true&w=majority' :
@@ -44,6 +45,10 @@ const routeComposer = new RouteComposer(express.Router(), [
     pubsub: PubSub
   }),
   new User({
+    docGen,
+    pubsub: PubSub
+  }),
+  new Shipping({
     docGen,
     pubsub: PubSub
   })

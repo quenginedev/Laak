@@ -1,26 +1,30 @@
 <template>
   <v-app>
-    <v-app-bar app :color="$vuetify.theme.dark ? '': 'white'" clipped-right clipped-left>
-      <v-avatar left color="primary" class="pa-1">
-        <v-img contain aspect-ratio="1" :src="require('../assets/logo.svg')"/>
-      </v-avatar>
-      <span class="ml-3 headline primary--text" v-if="$vuetify.breakpoint.mdAndUp">
-        Admin Panel
-      </span>
+    <v-app-bar :color="$vuetify.theme.dark ? '': 'white'" app flat>
       <v-spacer/>
-      <v-btn icon color="orange" @click="$vuetify.theme.dark = !$vuetify.theme.dark">
+      <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark" color="orange" icon>
         <v-icon>mdi-theme-light-dark</v-icon>
       </v-btn>
-      <v-btn icon disabled>
+      <v-btn disabled icon>
         <v-icon>mdi-bell-outline</v-icon>
       </v-btn>
       <v-btn @click="openNav = !openNav" icon>
         <v-icon>mdi-menu</v-icon>
       </v-btn>
     </v-app-bar>
-    <v-navigation-drawer app clipped v-model="openNav">
-      <v-list nav>
-        <v-list-item to="/" active-class="primary white--text ">
+    <v-navigation-drawer app v-model="openNav">
+      <v-list nav rounded>
+        <v-list-item>
+          <v-list-item-avatar @click="$router.push('/')" class="pa-1" color="primary" left style="cursor: pointer">
+            <v-img :src="require('../assets/logo.svg')" aspect-ratio="1" contain/>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>
+              Admin Panel
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item active-class="primary white--text " to="/">
           <v-list-item-avatar tile>
             <img src="../assets/svg/029-online order.svg"></img>
           </v-list-item-avatar>
@@ -30,12 +34,20 @@
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item to="/requests"  active-class="primary white--text">
+        <v-list-item active-class="primary white--text" to="/requests">
           <v-list-item-avatar tile>
             <img src="../assets/svg/041-on time.svg"></img>
           </v-list-item-avatar>
           <v-list-item-title>
             Requests
+          </v-list-item-title>
+        </v-list-item>
+        <v-list-item to="/shipping" active-class="primary white--text">
+          <v-list-item-avatar tile>
+            <img src="../assets/svg/002-trolley.svg">
+          </v-list-item-avatar>
+          <v-list-item-title>
+            Shipping
           </v-list-item-title>
         </v-list-item>
         <v-list-item>
@@ -48,10 +60,10 @@
         </v-list-item>
         <v-list-item>
           <v-list-item-avatar tile>
-            <img src="../assets/svg/005-truck.svg">
+            <img src="../assets/svg/022-courier.svg">
           </v-list-item-avatar>
           <v-list-item-title>
-            Drivers
+            Accounts
           </v-list-item-title>
         </v-list-item>
       </v-list>
@@ -68,6 +80,7 @@
 
 <script lang="ts">
   import Vue from 'vue'
+
   export default Vue.extend({
     data() {
       return {
