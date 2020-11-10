@@ -5,7 +5,7 @@ export default {
   // Global page headers (https://go.nuxtjs.dev/config-head)
   head: {
     titleTemplate: '%s - Laak',
-    title: 'Portal',
+    title: 'Admin',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -50,14 +50,14 @@ export default {
     // https://www.npmjs.com/package/@nuxtjs/dayjs
     '@nuxtjs/dayjs',
     //Custom module
-    // '~/api/modules/io',
+    '~/api/modules/io',
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
     proxy: true, // Used as fallback if no runtime config is provided
   },
-  
+
   // Content module configuration (https://go.nuxtjs.dev/config-content)
   content: {},
 

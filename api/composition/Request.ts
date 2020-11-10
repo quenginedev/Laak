@@ -1,8 +1,5 @@
-import RestComposer, {IRestComposerOpt} from "../../api/RestComposer";
-import {SchemaDefinition, Schema as MSchema} from "mongoose";
-import DocGen from "~/api/docGen";
-import {Socket} from "socket.io";
-
+import RestComposer, {IRestComposerOpt} from "../../api/RestComposer"
+import {SchemaDefinition, Schema as MSchema} from "mongoose"
 
 const location: SchemaDefinition = new MSchema({
   street: String,
@@ -24,7 +21,7 @@ const Schema: SchemaDefinition = {
   status: {
     type: String, enum: [
       'pending',
-      'assigned to driver',
+      'assigned to shipping',
       'on route',
       'delivered',
       'failed'
@@ -39,12 +36,13 @@ const Schema: SchemaDefinition = {
     date: {type: Date, required: true},
     phoneNumber: {type: String, required: [true, 'origin phone number required']},
     location: {type: location, required: [true, 'origin address not provided']}
-  }
+  },
+  driver_id: String,
+  price: Number
 }
 
 export default class Request extends RestComposer {
   constructor(cxt: IRestComposerOpt) {
     super('request', Schema, cxt)
   }
-
 }

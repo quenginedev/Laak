@@ -16,15 +16,23 @@
       >
         <template v-slot:top>
           <v-toolbar
+            flat
             rounded
           >
             <v-toolbar-title class="primary--text" v-if="$vuetify.breakpoint.mdAndUp">
               Requests
             </v-toolbar-title>
             <v-spacer/>
-            <v-text-field dense filled hide-details prepend-inner-icon="mdi-magnify" rounded v-model="searchRequests"/>
+            <v-text-field
+              dense
+              filled
+              hide-details
+              placeholder="Filter Requests"
+              prepend-inner-icon="mdi-magnify"
+              rounded
+              v-model="searchRequests"/>
             <v-spacer/>
-            <v-btn color="info" icon>
+            <v-btn disabled color="info" icon>
               <v-icon>mdi-printer-eye</v-icon>
             </v-btn>
             <v-btn @click="dialogCreate = true" color="success" icon>
@@ -85,7 +93,7 @@
         </template>
         <template v-slot:item.assign="{ item }">
           <v-btn :to="`/requests/${item._id}`" color="primary" rounded>
-            <v-icon left>mdi-truck</v-icon>
+            <v-icon left>mdi-dolly</v-icon>
             Assign
           </v-btn>
         </template>
@@ -149,14 +157,15 @@
                             filled
                             hide-details
                             placeholder="Pick Up Location"
-                            prepend-inner-icon="mdi-map-search" readonly/>
+                            prepend-inner-icon="mdi-map-search" readonly rounded/>
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field dense filled
                             hide-details
                             hint="The phone number to call" name="pickup_tel" placeholder="Pick Up Phone Number"
                             prepend-inner-icon="mdi-phone" type="tel"
-                            v-model.trim="newRequestForm.pickup.phoneNumber"/>
+                            v-model.trim="newRequestForm.pickup.phoneNumber"
+                            rounded/>
             </v-col>
             <v-col cols="12" sm="6">
               <v-menu
@@ -168,10 +177,12 @@
                                 prepend-inner-icon="mdi-calendar-clock"
                                 readonly
                                 v-model="newRequestForm.pickup.date"
-                                v-on="on"/>
+                                v-on="on"
+                                rounded/>
                 </template>
                 <v-date-picker
                   no-title
+                  :allowed-dates="(val)=>val >= new Date().toISOString().substr(0, 10)"
                   v-model="newRequestForm.pickup.date"
                 >
                 </v-date-picker>
@@ -188,7 +199,7 @@
                             hide-details
                             placeholder="Drop Off Location"
                             prepend-inner-icon="mdi-map-search"
-                            readonly readonly/>
+                            readonly rounded/>
             </v-col>
             <v-checkbox hide-details label="Drop off date and phone are the same as pick up"
                         v-model="dateAndPhoneAreSame"></v-checkbox>
@@ -196,21 +207,25 @@
               <v-text-field dense filled hide-details hint="The phone number to call" name="drop_off_tel"
                             placeholder="Pick Up Phone Number"
                             prepend-inner-icon="mdi-phone" type="tel"
-                            v-model.trim="newRequestForm.delivery.phoneNumber"/>
+                            v-model.trim="newRequestForm.delivery.phoneNumber"
+                            rounded/>
             </v-col>
             <v-col cols="12" sm="6" v-if="!dateAndPhoneAreSame">
               <v-menu
                 transition="scale-transition"
               >
                 <template v-slot:activator="{ on, attrs }">
-
                   <v-text-field dense filled hide-details hint="Date for drop off" placeholder="Drop off Date"
                                 prepend-inner-icon="mdi-calendar-clock"
                                 readonly
-                                v-model="newRequestForm.delivery.date"/>
+                                v-model="newRequestForm.delivery.date"
+                                v-on="on"
+                                rounded
+                  />
                 </template>
                 <v-date-picker
                   no-title
+                  :allowed-dates="(val)=>val >= newRequestForm.pickup.date"
                   v-model="newRequestForm.delivery.date"
                 />
               </v-menu>
@@ -218,7 +233,7 @@
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-btn :loading="creating_request" @click="createRequest" block color="primary">Create</v-btn>
+          <v-btn :loading="creating_request" @click="createRequest" block color="primary">Create Request</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -235,7 +250,8 @@
                 hide-details
                 placeholder="Search place"
                 solo
-                v-model="map.places.search_phrase">
+                v-model="map.places.search_phrase"
+                rounded>
                 <v-icon @click="searchPlaces" slot="append" v-show="map.places.search_phrase">mdi-magnify</v-icon>
                 <v-icon @click="map.show = false" slot="append-outer">mdi-close</v-icon>
               </v-text-field>
@@ -329,7 +345,7 @@
   const newRequestForm: IRequest = {
     user: '',
     delivery: {
-      date: new Date().toISOString().substr(0, 10),
+      date: '',
       phoneNumber: '',
       location: {
         street: '',

@@ -1,5 +1,5 @@
 <template>
-  <v-row justify="center">
+  <v-row justify="">
     <v-col cols="12" sm="4">
       <v-card to="/requests" :loading="loading">
         <v-card-title>
@@ -52,7 +52,6 @@
           this.$axios.get('/api/request/count', {params: { where: { status: 'pending' } }}),
           this.$axios.get('/api/request/count', { params: { where: { status: 'delivered' } } })
         ]).then(res=>{
-          console.log({ res })
           this.pending_requests = res[0].data
         }).catch(error=>{
           console.error({error})
