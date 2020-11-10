@@ -76,7 +76,7 @@
       </v-container>
     </v-main>
     <v-footer app inset>
-      Socket testing
+      Socket testing 0.0.01
     </v-footer>
   </v-app>
 </template>
